@@ -1,16 +1,8 @@
----
-title:  'Reproducible Research: Peer Assessment 1'
-author:  'Ken Karan'
-date:  "`r Sys.Date()`"
-output:
-     html_document:
-       keep_md: true
----
+# Reproducible Research: Peer Assessment 1
+Ken Karan  
+`r Sys.Date()`  
 
-```{r, include=FALSE}
-library(knitr)
-opts_chunk$set(fig.path="figure/")
-```
+
 
 ## Overview
 
@@ -32,9 +24,26 @@ individual between 10/2012 and 11/2012.
 
 This assignment uses the dplyr and lattice packages
 
-```{r, results='hold'}
+
+```r
 # Activate libraries needed
 library(dplyr)
+```
+
+```
+## 
+## Attaching package: 'dplyr'
+## 
+## The following object is masked from 'package:stats':
+## 
+##     filter
+## 
+## The following objects are masked from 'package:base':
+## 
+##     intersect, setdiff, setequal, union
+```
+
+```r
 library(lattice)
 ```
 
@@ -43,7 +52,8 @@ The data was downloaded form the course website at https://d396qusza40orc.cloudf
 
 The following code was used to download and unzip the data:
 
-```{r, results='hold'}
+
+```r
 # Download data from internet
 chrSourceFileUrl <- "http://d396qusza40orc.cloudfront.net/repdata%2Fdata%2Factivity.zip"
 chrDestFileName <- "activity.zip"
@@ -54,10 +64,11 @@ unzip(chrDestFileName)
 ### Data format
 The data is in comma delimited format.  The first row contains header
 information and there are
-`r prettyNum(length(readLines("activity.csv")), big.mark=",")`
+17,569
 rows of data.
 
-```{r}
+
+```r
 # Read using base/dplyr
 intRows <- length(readLines("activity.csv"))
 dftActivity <- tbl_df(read.table(
@@ -77,7 +88,8 @@ function.  Day of week and logical weekend indicator is created for
 the last part of this assignment.  Assign factor labels to the 
 weekend indicator.
 
-```{r}
+
+```r
 # Convert date to POSIXct format
 # Add day of week (dow) and weekend variables to be used in last
 # portion of assignment.
@@ -104,7 +116,8 @@ is summarised to one row per day regardless of time interval.  A
 histogram is produced and report of mean and median is printed.  As
 per assignment directions, NA values are ignored.
 
-```{r out.height='450px', out.width='450px'}
+
+```r
 # summarise data by day
 dftActByDate <- dftActivity %>%
     group_by(psxDate) %>%
@@ -117,7 +130,11 @@ hist(dftActByDate$steps,
     main="Freq Histogram of Steps Per Day",
     xlab="Steps per Day"
     )
+```
 
+<img src="figure/unnamed-chunk-6-1.png" title="" alt="" width="450px" height="450px" />
+
+```r
 # report mean and median steps per day
 # summary(dftActByDay$steps)[c("Median", "Mean")]
 summarise(dftActByDate,
@@ -126,25 +143,33 @@ summarise(dftActByDate,
     )
 ```
 
+```
+## Source: local data frame [1 x 2]
+## 
+##   steps_mean steps_median
+## 1       9354        10395
+```
+
 The data shows a mostly normal distribution around the mean except for
 a spike around the low end of the distribution because of the NA
 values.  The mean number of steps per day is
-`r prettyNum(summarise(dftActByDate, steps_mean=round(mean(steps, na.rm=T), dig=0)), big.mark=",")`
+9,354
 and the median number of steps per day is
-`r prettyNum(summarise(dftActByDate, steps_median=median(steps, na.rm=T)), big.mark=",")`
+10,395
 .
 
 ## What is the average daily activity pattern?
 
 Summarizing the data across days by time interval we see that the
 interval that contains the maximum number of steps is
-`r prettyNum(filter(dftActByInterval, steps==max(steps, na.rm=T)) %>% select(interval), big.mark=",")`
+835
 .  This may correspond to walking to work.  There are additional spikes around noon, 16:00, and 19:00.  This might correspond to walking
 from work or from evening activities.  There is little activity
 between 22:30 and 05:30 suggesting bedtime.  The following graph
 illustrates this:
 
-```{r results='hold', fig.show='hold', out.height='450px', out.width='450px'}
+
+```r
 # What is the average daily activity pattern
 # summarise by interval
 dftActByInterval <-
@@ -166,6 +191,8 @@ axis(1, at=seq(0, 3000, 100), las=2)
 }
 ```
 
+<img src="figure/unnamed-chunk-7-1.png" title="" alt="" width="450px" height="450px" />
+
 ## Imputing missing values
 
 There were a number of days where steps were missing.  This could be
@@ -179,7 +206,8 @@ as follows:
 3. Otherwise if the steps column is not missing, then it contains the 
 original steps value.
 
-```{r}
+
+```r
 # Find average steps by dow and interval
 # Ignore missing data
 dftDowInterv <-
@@ -202,15 +230,21 @@ A final check of the datasets before and after the join show they
 have the same number of rows.  This shows that the join worked
 correctly:
 
-```{r}
+
+```r
 # Check that output of join has same number of rows as input of join
 nrow(dftActivity) == nrow(dftActivity2)
+```
+
+```
+## [1] TRUE
 ```
 
 After summarizing the new imputed data by day, a new frequency
 histogram and summary mean and median is created.
 
-```{r, out.height='450px', out.width='450px'}
+
+```r
 # summarise data by day
 dftActByDate2 <- dftActivity2 %>%
     group_by(psxDate) %>%
@@ -221,7 +255,11 @@ hist(dftActByDate2$steps,
     breaks=15,
     main="Freq Histogram of Steps Per Day With NA values Imputed",
     xlab="Steps per Day")
+```
 
+<img src="figure/unnamed-chunk-10-1.png" title="" alt="" width="450px" height="450px" />
+
+```r
 # report mean and median steps per day using imputed data
 # summary(dftActByDay$steps)[c("Median", "Mean")]
 summarise(dftActByDate2,
@@ -230,12 +268,19 @@ summarise(dftActByDate2,
     )
 ```
 
+```
+## Source: local data frame [1 x 2]
+## 
+##   steps_mean steps_median
+## 1    10821.1        11015
+```
+
 The graph shows the spike at the low end of the x axis is gone and
 the data is more normally distributed.  The mean number of steps per
 day is now
-`r prettyNum(summarise(dftActByDate2, steps_mean=round(mean(steps, na.rm=T), dig=0)), big.mark=",")`
+10,821
 and the median number of steps per day is now
-`r prettyNum(summarise(dftActByDate2, steps_median=median(steps, na.rm=T)), big.mark=",")`
+11,015
 .  The impact of imputing the data is that both mean and median values
 of total daily steps are now higher.
 
@@ -246,7 +291,8 @@ variables were created.  The imputed steps data was plotted on the
 Y-axis and the time interval was plotted on the X-axis.  Two plots
 were constructed:  one for weekend and another for weekday:
 
-```{r, out.height='450px', out.width='450px'}
+
+```r
 # Differences in activity patterns on weekends
 dftActByIntrvWknd <- dftActivity2 %>%
     group_by(interval, weekend) %>%
@@ -260,6 +306,8 @@ xyplot(steps ~ interval | weekend,
     ylab="Average Steps Taken Across Days"
     )
 ```
+
+<img src="figure/unnamed-chunk-11-1.png" title="" alt="" width="450px" height="450px" />
 
 The two plots show that there was much more activity on weekday
 mornings and evenings.  Also, there is much less activity on weekends
